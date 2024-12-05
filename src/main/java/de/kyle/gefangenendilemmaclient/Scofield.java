@@ -35,7 +35,7 @@ public class Scofield implements Prisoner {
         PrisonerMessResult nextMove;
         switch (opponentStrategy) {
             case NAIVE -> {
-                nextMove = (random.nextDouble() < 0.2) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
+                nextMove = (random.nextDouble() < 0.6) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
             }
             case TIT_FOR_TAT, UNCLASSIFIABLE -> nextMove = (lastOpponentResult == PrisonerMessResult.BETRAY) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
             default -> nextMove = PrisonerMessResult.COOPERATE;
