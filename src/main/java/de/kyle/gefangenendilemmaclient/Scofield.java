@@ -32,23 +32,8 @@ public class Scofield implements Prisoner {
     public PrisonerMessResult messAround(String opponent) {
         currentOpponent = opponent;
 
-        if (firstRound) {
-            firstRound = false;
-            firstOpponent = currentOpponent;
-        }
-
-        if (firstOpponent.equals(currentOpponent) && !firstRoundPlayed) {
-            rounds++;
-        } else {
-            firstRoundPlayed = true;
-        }
-
-        if (firstRoundPlayed) {
-            if (currentRound == rounds) {
-                currentRound = 1;
-                return PrisonerMessResult.BETRAY;
-            }
-            currentRound++;
+        if (shouldBetrayIfLastRound()){
+            return PrisonerMessResult.BETRAY;
         }
 
         if (!isOpponentKnown(opponent)) {
@@ -63,9 +48,10 @@ public class Scofield implements Prisoner {
             case NAIVE -> {
                 nextMove = PrisonerMessResult.BETRAY;
             }
-            case TIT_FOR_TAT->
+            case TIT_FOR_TAT ->
                     nextMove = (lastOpponentResult == PrisonerMessResult.BETRAY) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
-            case UNCLASSIFIABLE -> nextMove = (random.nextDouble() < 0.7) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
+            case UNCLASSIFIABLE ->
+                    nextMove = (random.nextDouble() < 0.7) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
             default -> nextMove = PrisonerMessResult.COOPERATE;
         }
 
@@ -91,6 +77,28 @@ public class Scofield implements Prisoner {
         }
 
         lastOpponentResult = opponentResult;
+    }
+
+    private boolean shouldBetrayIfLastRound() {
+        if (firstRound) {
+            firstRound = false;
+            firstOpponent = currentOpponent;
+        }
+
+        if (firstOpponent.equals(currentOpponent) && !firstRoundPlayed) {
+            rounds++;
+        } else {
+            firstRoundPlayed = true;
+        }
+
+        if (firstRoundPlayed) {
+            if (currentRound - 1 == rounds) {
+                currentRound = 0;
+                return true;
+            }
+            currentRound++;
+        }
+        return false;
     }
 
     private boolean isOpponentNaive(PrisonerMessResult opponentResult) {
