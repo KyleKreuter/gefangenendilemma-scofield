@@ -16,6 +16,13 @@ public class Scofield implements Prisoner {
     private PrisonerMessResult lastPrisonerResult;
     private PrisonerMessResult lastOpponentResult;
 
+    private boolean firstRound = true;
+    private boolean firstRoundPlayed;
+    private String firstOpponent;
+    private int rounds;
+    private int currentRound;
+
+
     @Override
     public String getName() {
         return "Scofield";
@@ -24,6 +31,25 @@ public class Scofield implements Prisoner {
     @Override
     public PrisonerMessResult messAround(String opponent) {
         currentOpponent = opponent;
+
+        if (firstRound) {
+            firstRound = false;
+            firstOpponent = currentOpponent;
+        }
+
+        if (firstOpponent.equals(currentOpponent) && !firstRoundPlayed) {
+            rounds++;
+        } else {
+            firstRoundPlayed = true;
+        }
+
+        if (firstRoundPlayed) {
+            if (currentRound == rounds) {
+                currentRound = 1;
+                return PrisonerMessResult.BETRAY;
+            }
+            currentRound++;
+        }
 
         if (!isOpponentKnown(opponent)) {
             lastPrisonerResult = PrisonerMessResult.COOPERATE;
@@ -35,9 +61,11 @@ public class Scofield implements Prisoner {
         PrisonerMessResult nextMove;
         switch (opponentStrategy) {
             case NAIVE -> {
-                nextMove = (random.nextDouble() < 0.6) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
+                nextMove = PrisonerMessResult.BETRAY;
             }
-            case TIT_FOR_TAT, UNCLASSIFIABLE -> nextMove = (lastOpponentResult == PrisonerMessResult.BETRAY) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
+            case TIT_FOR_TAT->
+                    nextMove = (lastOpponentResult == PrisonerMessResult.BETRAY) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
+            case UNCLASSIFIABLE -> nextMove = (random.nextDouble() < 0.7) ? PrisonerMessResult.BETRAY : PrisonerMessResult.COOPERATE;
             default -> nextMove = PrisonerMessResult.COOPERATE;
         }
 
@@ -66,7 +94,8 @@ public class Scofield implements Prisoner {
     }
 
     private boolean isOpponentNaive(PrisonerMessResult opponentResult) {
-        return lastPrisonerResult == PrisonerMessResult.BETRAY && opponentResult == PrisonerMessResult.COOPERATE;
+        return (lastPrisonerResult == PrisonerMessResult.BETRAY && opponentResult == PrisonerMessResult.COOPERATE) ||
+                (lastPrisonerResult == PrisonerMessResult.COOPERATE && opponentResult == PrisonerMessResult.BETRAY);
     }
 
     private boolean isOpponentTitForTat(PrisonerMessResult opponentResult) {
